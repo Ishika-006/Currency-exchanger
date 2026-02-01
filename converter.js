@@ -56,7 +56,6 @@ btn.addEventListener("click",async (evt)  => {
     try {
         let rates;
 
-        // 🔥 CACHE OPTIMIZATION
         if (rateCache[base]) {
             // cache hit
             rates = rateCache[base];
