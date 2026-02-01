@@ -5,6 +5,7 @@ const fromCurr = document.querySelector(".from select");
 const toCurr = document.querySelector(".to select");
 const msg = document.querySelector(".msg");
 let currMode = "light";
+let rateCache = {};
 btn.addEventListener("click",()=>{
     if (currMode =="light"){
         currMode="dark";
@@ -49,12 +50,26 @@ btn.addEventListener("click",async (evt)  => {
         amtVal = 1;
         amount.value = "1";
     }
-    const URL = `${BASE_URL}/${fromCurr.value.toLowerCase()}.json`;
-    try{
-    let response = await fetch(URL);
-    let data = await response.json();
-    let rates = data[fromCurr.value.toLowerCase()];
-    let rate = rates[toCurr.value.toLowerCase()];
+    let base = fromCurr.value.toLowerCase();
+    let target = toCurr.value.toLowerCase();
+
+    try {
+        let rates;
+
+        // 🔥 CACHE OPTIMIZATION
+        if (rateCache[base]) {
+            // cache hit
+            rates = rateCache[base];
+        } else {
+            // cache miss → API call
+            const URL = `${BASE_URL}/${base}.json`;
+            let response = await fetch(URL);
+            let data = await response.json();
+            rates = data[base];
+            rateCache[base] = rates; // save to cache
+        }
+
+        let rate = rates[target];
     if (!rate) {
         msg.innerText = `Conversion rate for ${fromCurr.value} to ${toCurr.value} not available.`;
         return;
